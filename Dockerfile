@@ -30,16 +30,19 @@ RUN useradd -m -s /bin/bash agent && \
     chmod 0440 /etc/sudoers.d/nert
 
 ## SSH Setup - ONLY agent and nert allowed, key-only authentication
+## SSH Setup - ONLY agent and nert allowed, key-only authentication
 RUN mkdir -p /var/run/sshd && \
     ssh-keygen -A && \
     sed -i 's/#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && \
-    cat <<EOF >> /etc/ssh/sshd_config
+    cat <<'EOF' >> /etc/ssh/sshd_config
 
+# SSH hardening
 PasswordAuthentication no
 PermitEmptyPasswords no
 KbdInteractiveAuthentication no
 PubkeyAuthentication yes
 AllowUsers agent nert
+PermitRootLogin no
 EOF
     && \
     sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
