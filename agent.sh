@@ -15,8 +15,6 @@ CONTAINER_NAME="opencode-container"
 
 # Default values — feel free to override via environment variables
 PORT_MAPPING="2222:22"
-OPENCODE_AUTH_MOUNT="-v ${SCRIPT_DIR}/opencode_auth:/home/ubuntu/.local/share/opencode"
-OPENCODE_CONFIG_MOUNT="-v ${SCRIPT_DIR}/opencode_config:/home/ubuntu/.config/opencode"
 
 usage() {
   cat << EOF
@@ -66,8 +64,6 @@ run() {
     -p "$PORT_MAPPING" \
     --restart unless-stopped \
     -e GITHUB_TOKEN \
-    $OPENCODE_AUTH_MOUNT \
-    $OPENCODE_CONFIG_MOUNT \
     "$IMAGE_NAME"; then
     echo "❌ Failed to create container" >&2
     exit 1
