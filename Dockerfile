@@ -43,8 +43,7 @@ KbdInteractiveAuthentication no
 PubkeyAuthentication yes
 AllowUsers agent nert
 PermitRootLogin no
-EOF
-    && \
+EOF && \
     sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
 
 ## CLI Tools (DuckDB & Lea)
