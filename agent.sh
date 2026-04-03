@@ -51,13 +51,7 @@ run() {
   # Stop and remove if already running
   docker stop "$CONTAINER_NAME" >/dev/null 2>&1 || true
   docker rm "$CONTAINER_NAME" >/dev/null 2>&1 || true
-  
-  # expect github token
-  if [ -z "${GITHUB_TOKEN-}" ]; then
-    echo "❌ Error: GITHUB_TOKEN is not set. Cannot run."
-    exit 1
-  fi
-  
+
   # Try to start it
   if ! docker run -d \
     --name "$CONTAINER_NAME" \
