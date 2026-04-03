@@ -62,16 +62,13 @@ RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygi
     install lazygit /usr/local/bin && \
     rm lazygit.tar.gz lazygit
 
-## Pre-create OpenCode directories + install OpenCode AI for both users
-RUN mkdir -p /home/agent/.local/share/opencode /home/agent/.config/opencode && \
-    chown -R agent:agent /home/agent/.local/share/opencode /home/agent/.config/opencode && \
-    mkdir -p /home/nert/.local/share/opencode /home/nert/.config/opencode && \
-    chown -R nert:nert /home/nert/.local/share/opencode /home/nert/.config/opencode
+## Pre-create directories and ensure correct ownership
+RUN mkdir -p /home/agent/.local/share /home/agent/.config && \
+    mkdir -p /home/nert/.local/share /home/nert/.config && \
+    chown -R agent:agent /home/agent && \
+    chown -R nert:nert /home/nert
 
 USER agent
-RUN curl -fsSL https://opencode.ai/install | bash
-
-USER nert
 RUN curl -fsSL https://opencode.ai/install | bash
 
 USER root
