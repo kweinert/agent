@@ -42,27 +42,22 @@ RUN mkdir -p /var/run/sshd && \
     echo "AllowUsers agent nert" >> /etc/ssh/sshd_config && \
     sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
 
-## CLI Tools (DuckDB & Lea)
+## DuckDB 
 RUN DUCKDB_VERSION=$(curl -s https://api.github.com/repos/duckdb/duckdb/releases/latest | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
     wget "https://github.com/duckdb/duckdb/releases/download/v${DUCKDB_VERSION}/duckdb_cli-linux-amd64.zip" && \
     unzip duckdb_cli-linux-amd64.zip -d /usr/local/bin/ && \
     rm duckdb_cli-linux-amd64.zip && \
     chmod +x /usr/local/bin/duckdb
 
+## Lea
 RUN pip3 install --no-cache-dir --break-system-packages lea-cli duckdb
 
-## Add lazygit PPA and install via apt (works on Ubuntu 24.04)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends software-properties-common && \
-    add-apt-repository ppa:lazygit-team/release -y && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends lazygit && \
-    apt-get purge -y software-properties-common && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
-
-
-USER root
+## lazygit 
+RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" && \
+    tar xf lazygit.tar.gz lazygit && \
+    install lazygit /usr/local/bin && \
+    rm lazygit.tar.gz lazygit
 
 ## Pre-create OpenCode directories + install OpenCode AI for both users
 RUN mkdir -p /home/agent/.local/share/opencode /home/agent/.config/opencode && \
