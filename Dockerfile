@@ -8,6 +8,7 @@ RUN apt-get update && \
         openssh-server python3 python3-pip git wget unzip curl tmux less \
         r-base r-base-dev libcurl4-openssl-dev \
         libcurl4 libxml2-dev libssl-dev build-essential xclip ripgrep fd-find fzf \
+		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
         sudo gh \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
