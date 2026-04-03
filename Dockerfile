@@ -93,16 +93,15 @@ RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     rm /tmp/authorizedkeys
 	
 ## Shell UX (Tmux & Bashrc) + GITHUB_TOKEN placeholder for both users
-RUN echo "set -g mouse on
-set -g history-limit 50000
-set -g default-terminal \"screen-256color\"
-set -sg escape-time 10
-setw -g mode-keys vi" > /etc/tmux.conf && \
+RUN echo "set -g mouse on" > /etc/tmux.conf && \
+    echo "set -g history-limit 50000" >> /etc/tmux.conf && \
+    echo "set -g default-terminal \"screen-256color\"" >> /etc/tmux.conf && \
+    echo "set -sg escape-time 10" >> /etc/tmux.conf && \
+    echo "setw -g mode-keys vi" >> /etc/tmux.conf && \
     echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/agent/.bashrc && \
     echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/nert/.bashrc && \
     echo 'export GITHUB_TOKEN="${GITHUB_TOKEN}"' >> /home/agent/.bashrc && \
     echo 'export GITHUB_TOKEN="${GITHUB_TOKEN}"' >> /home/nert/.bashrc
-	
 
 ## R Configuration (Using PPM Binaries)
 RUN R_VERSION=$(R --version | head -n 1 | sed -E 's/.*version ([0-9]+\.[0-9]+).*/\1/') && \
