@@ -33,7 +33,6 @@ RUN useradd -m -s /bin/bash agent && \
 
 ## SSH Setup - ONLY agent and nert allowed, key-only authentication
 RUN mkdir -p /var/run/sshd && \
-    ssh-keygen -A && \
     sed -i 's/#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && \
     echo "" >> /etc/ssh/sshd_config && \
     echo "# SSH hardening" >> /etc/ssh/sshd_config && \
@@ -136,5 +135,5 @@ HEALTHCHECK --interval=60s --timeout=20s --start-period=120s --retries=3 \
     CMD bash -c 'echo -n > /dev/tcp/127.0.0.1/22' || exit 1
 
 EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/bin/bash", "-c", "ssh-keygen -A && mkdir -p /var/run/sshd && /usr/sbin/sshd -D"]
 
