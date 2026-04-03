@@ -70,7 +70,7 @@ run() {
   while [ $waited -lt 20 ]; do
     if docker inspect "$CONTAINER_NAME" --format '{{.State.Running}}' 2>/dev/null | grep -q '^true$'; then
       echo "→ Container is running."
-      echo "→ Connect with: ssh ubuntu@localhost -p 2222"
+      echo "→ Connect with: ssh agent@localhost -p 2222 or ssh nert@localhost -p 2222"
       echo "→ Or open shell: $0 exec"
       return 0
     fi
