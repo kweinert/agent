@@ -106,20 +106,19 @@ RUN echo "set -g mouse on" > /etc/tmux.conf && \
 ## R Configuration (Using PPM Binaries)
 RUN R_VERSION=$(R --version | head -n 1 | sed -E 's/.*version ([0-9]+\.[0-9]+).*/\1/') && \
     echo "Detected R version: $R_VERSION" && \
-    echo "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/noble/latest'), pkg.type = 'binary')" > /usr/lib/R/etc/Rprofile.site && \
-    echo '
-# Custom q() that does not ask to save workspace by default
-utils::assignInNamespace(
-  "q",
-  function(save = "no", status = 0, runLast = TRUE) {
-    .Internal(quit(save, status, runLast))
-  },
-  "base"
-)
-' >> /usr/lib/R/etc/Rprofile.site && \
+    echo "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/noble/latest'), pkg.type = 'binary')" >> /usr/lib/R/etc/Rprofile.site && \
+    echo "" >> /usr/lib/R/etc/Rprofile.site && \
+    echo "# Custom q() that does not ask to save workspace by default" >> /usr/lib/R/etc/Rprofile.site && \
+    echo "utils::assignInNamespace(" >> /usr/lib/R/etc/Rprofile.site && \
+    echo "  'q'," >> /usr/lib/R/etc/Rprofile.site && \
+    echo "  function(save = 'no', status = 0, runLast = TRUE) {" >> /usr/lib/R/etc/Rprofile.site && \
+    echo "    .Internal(quit(save, status, runLast))" >> /usr/lib/R/etc/Rprofile.site && \
+    echo "  }," >> /usr/lib/R/etc/Rprofile.site && \
+    echo "  'base'" >> /usr/lib/R/etc/Rprofile.site && \
+    echo ")" >> /usr/lib/R/etc/Rprofile.site && \
     R -q -e 'install.packages("pak", repos = "https://r-lib.github.io/p/pak/stable")' && \
     R -q -e 'pak::pkg_install(c("remotes", "data.table", "duckdb", "shiny", "bslib", "reactable", "plotly", "pdftools"))'
-	
+
 ##  Neovim Setup (copy config + sync plugins for both users)
 COPY kickstart.nvim /tmp/kickstart.nvim
 RUN mkdir -p /home/agent/.config/nvim /home/nert/.config/nvim && \
