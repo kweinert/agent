@@ -1,0 +1,116 @@
+-- Set leader key BEFORE plugins
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ' '
+
+-- Basic sensible options
+vim.o.number = false
+vim.o.mouse = 'a'
+vim.o.showmode = false
+vim.o.ignorecase = true
+vim.o.smartcase = true
+vim.o.signcolumn = 'yes'        
+vim.o.clipboard = 'unnamedplus'
+
+-- Clear search highlights on Esc
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Highlight on yank
+vim.api.nvim_create_autocmd('TextYankPost', {
+  desc = 'Highlight when yanking text',
+  group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
+  callback = function()
+    -- Use the full name 'highlight' instead of the 'hl' alias
+    vim.highlight.on_yank()
+  end,
+})
+
+-- Tab and Indent settings
+vim.opt.tabstop = 4       -- Number of spaces a <Tab> in the file counts for
+vim.opt.softtabstop = 4   -- Number of spaces a <Tab> counts for while editing
+vim.opt.shiftwidth = 4    -- Number of spaces to use for each step of (auto)indent
+vim.opt.expandtab = false -- Convert tabs to spaces
+
+-- .sql.jinja -> sql mapping
+vim.filetype.add({
+  extension = {
+    -- This handles the .jinja part
+    jinja = 'sql',
+  },
+  pattern = {
+    -- This specifically targets the double extension
+    ['.*%.sql%.jinja'] = 'sql',
+  },
+})
+
+-- =============== Lazy.nvim ===============
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  local out = vim.fn.system({
+    'git', 'clone', '--filter=blob:none', '--branch=stable',
+    'https://github.com/folke/lazy.nvim.git', lazypath
+  })
+  if vim.v.shell_error ~= 0 then
+    error('Error cloning lazy.nvim:\n' .. out)
+  end
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- =============== Plugins ===============
+require('lazy').setup({
+  {
+    'nvim-telescope/telescope.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      {
+        'nvim-telescope/telescope-fzf-native.nvim',
+        build = 'make',
+        cond = function() return vim.fn.executable('make') == 1 end,
+      }
+    },
+
+    config = function()
+      local telescope = require('telescope')
+      telescope.setup({
+        -- Default configuration for all pickers
+        defaults = {
+          mappings = {
+            i = {
+              ['<C-u>'] = false,        -- disable clear line in insert mode
+              ['<C-d>'] = false,        -- disable scroll down
+            }
+          }
+        },
+
+        -- Picker-specific settings
+        pickers = {
+          find_files = {
+            -- Use fd instead of find → much faster
+            find_command = { 'fd', '--type', 'f', '--strip-cwd-prefix', '--hidden' },
+          },
+          live_grep = {
+            -- Optional: add more control over live_grep if needed
+            additional_args = function() return { '--hidden' } end,
+          }
+        }
+      })
+
+      -- Load extensions
+      pcall(telescope.load_extension, 'fzf')
+
+      local builtin = require('telescope.builtin')
+
+      -- Keymaps (kept most useful ones, removed less common)
+      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>fg', builtin.live_grep,  { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
+      vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
+      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find buffers' })
+      vim.keymap.set('n', '<leader>/', function()
+        builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown({
+          winblend = 10,
+          previewer = false,
+        }))
+      end, { desc = '[/] Fuzzily search in current buffer' })
+    end,
+  },
+})
