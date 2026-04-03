@@ -40,7 +40,7 @@ build() {
   cd "$SCRIPT_DIR" || { echo "Error: cannot cd to $SCRIPT_DIR"; exit 1; }
 
   echo "→ Building Docker image: $IMAGE_NAME"
-  docker build -t "$IMAGE_NAME" .
+  docker build --progress=plain -t "$IMAGE_NAME" .
 
   echo "→ Build complete."
 }
