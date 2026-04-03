@@ -5,10 +5,11 @@ USER root
 ## System basics 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        openssh-server python3 python3-pip git wget unzip curl tmux less \
+        openssh-server python3 python3-pip git wget unzip curl tmux less htop \
         r-base r-base-dev libcurl4-openssl-dev \
         libcurl4 libxml2-dev libssl-dev build-essential xclip ripgrep fd-find fzf \
 		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
+		libopenblas-dev libopenblas-base \
         sudo gh \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
@@ -112,7 +113,7 @@ RUN R_VERSION=$(R --version | head -n 1 | sed -E 's/.*version ([0-9]+\.[0-9]+).*
     echo "  'base'" >> /usr/lib/R/etc/Rprofile.site && \
     echo ")" >> /usr/lib/R/etc/Rprofile.site && \
     R -q -e 'install.packages("pak", repos = "https://r-lib.github.io/p/pak/stable")' && \
-    R -q -e 'pak::pkg_install(c("remotes", "data.table", "duckdb", "shiny", "bslib", "reactable", "plotly", "pdftools"))'
+    R -q -e 'pak::pkg_install(c("remotes", "data.table", "duckdb", "shiny", "bslib", "reactable", "plotly", "pdftools", "RhpcBLASctl"))'
 
 ##  Neovim Setup (copy config + sync plugins for both users)
 COPY kickstart.nvim /tmp/kickstart.nvim
