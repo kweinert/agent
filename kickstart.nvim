@@ -59,6 +59,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   {
     'nvim-telescope/telescope.nvim',
+    tag = '0.1.8', -- so it works with nvim 0.10
     dependencies = {
       'nvim-lua/plenary.nvim',
       {
