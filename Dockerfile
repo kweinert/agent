@@ -9,7 +9,7 @@ RUN apt-get update && \
         r-base r-base-dev libcurl4-openssl-dev \
         libcurl4 libxml2-dev libssl-dev build-essential xclip ripgrep fd-find fzf \
 		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
-		libopenblas-dev libopenblas-base \
+		libopenblas0 libopenblas-dev \
         sudo gh \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
