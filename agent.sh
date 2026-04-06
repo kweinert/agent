@@ -57,7 +57,8 @@ run() {
     --name "$CONTAINER_NAME" \
     -p "$PORT_MAPPING" \
     --restart unless-stopped \
-    -e GITHUB_TOKEN \
+    -e GITHUB_TOKEN_NERT \
+    -e GITHUB_TOKEN_AGENT \
     "$IMAGE_NAME"; then
     echo "❌ Failed to create container" >&2
     exit 1
