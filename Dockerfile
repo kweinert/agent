@@ -109,9 +109,7 @@ RUN echo "set -g mouse on" > /etc/tmux.conf && \
     echo "set -sg escape-time 10" >> /etc/tmux.conf && \
     echo "setw -g mode-keys vi" >> /etc/tmux.conf && \
     echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/agent/.bashrc && \
-    echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/nert/.bashrc && \
-    echo 'export GITHUB_TOKEN="${GITHUB_TOKEN}"' >> /home/agent/.bashrc && \
-    echo 'export GITHUB_TOKEN="${GITHUB_TOKEN}"' >> /home/nert/.bashrc
+    echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/nert/.bashrc 
 
 ## R Configuration (Using PPM Binaries)
 RUN R_VERSION=$(R --version | head -n 1 | sed -E 's/.*version ([0-9]+\.[0-9]+).*/\1/') && \
