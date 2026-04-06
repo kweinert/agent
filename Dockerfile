@@ -79,6 +79,20 @@ USER root
 ## Copy authorizedkeys (same public key file works for both users)
 COPY authorizedkeys /tmp/authorizedkeys
 
+## Per-user GitHub tokens for SSH login shells
+RUN echo 'GH_TOKEN' >> /etc/environment && \
+    # For agent user
+    echo 'if [ "$USER" = "agent" ] && [ -n "$GITHUB_TOKEN_AGENT" ]; then' >> /home/agent/.bashrc && \
+    echo '  export GH_TOKEN="$GITHUB_TOKEN_AGENT"' >> /home/agent/.bashrc && \
+    echo 'fi' >> /home/agent/.bashrc && \
+    # For nert user
+    echo 'if [ "$USER" = "nert" ] && [ -n "$GITHUB_TOKEN_NERT" ]; then' >> /home/nert/.bashrc && \
+    echo '  export GH_TOKEN="$GITHUB_TOKEN_NERT"' >> /home/nert/.bashrc && \
+    echo 'fi' >> /home/nert/.bashrc && \
+    # Make sure both users own their .bashrc
+    chown agent:agent /home/agent/.bashrc && \
+    chown nert:nert /home/nert/.bashrc
+
 RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     cp /tmp/authorizedkeys /home/agent/.ssh/authorized_keys && \
     cp /tmp/authorizedkeys /home/nert/.ssh/authorized_keys && \
