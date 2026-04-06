@@ -44,9 +44,6 @@ RUN mkdir -p /var/run/sshd && \
     echo "KbdInteractiveAuthentication no" >> /etc/ssh/sshd_config && \
     echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \
     echo "AllowUsers agent nert" >> /etc/ssh/sshd_config && \
-	echo "" >> /etc/ssh/sshd_config && \
-	echo "# Custom Github Tokens" >> /etc/ssh/sshd_config && \
-	echo "PermitUserEnvironment yes" >> /etc/ssh/sshd_config && \
     sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
 
 ## DuckDB 
@@ -83,8 +80,11 @@ USER root
 COPY authorizedkeys /tmp/authorizedkeys
 
 ## Per-user GitHub tokens for SSH login shells
+RUN echo 'GITHUB_TOKEN_AGENT' >> /etc/environment && \
+    echo 'GITHUB_TOKEN_NERT'   >> /etc/environment
+
 RUN echo 'if [ -n "$GITHUB_TOKEN_AGENT" ]; then export GH_TOKEN="$GITHUB_TOKEN_AGENT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/agent/.bashrc && \
-    echo 'if [ -n "$GITHUB_TOKEN_NERT" ]; then export GH_TOKEN="$GITHUB_TOKEN_NERT"; unset GITHUB_TOKEN_NERT GITHUB_TOKEN_AGENT; fi' >> /home/nert/.bashrc && \
+    echo 'if [ -n "$GITHUB_TOKEN_NERT" ]; then export GH_TOKEN="$GITHUB_TOKEN_NERT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/nert/.bashrc && \
     chown agent:agent /home/agent/.bashrc && \
     chown nert:nert /home/nert/.bashrc
 
