@@ -83,10 +83,10 @@ COPY authorizedkeys /tmp/authorizedkeys
 RUN echo 'GITHUB_TOKEN_AGENT' >> /etc/environment && \
     echo 'GITHUB_TOKEN_NERT'   >> /etc/environment
 
-RUN echo 'if [ -n "$GITHUB_TOKEN_AGENT" ]; then export GH_TOKEN="$GITHUB_TOKEN_AGENT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/agent/.bashrc && \
-    echo 'if [ -n "$GITHUB_TOKEN_NERT" ]; then export GH_TOKEN="$GITHUB_TOKEN_NERT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/nert/.bashrc && \
-    chown agent:agent /home/agent/.bashrc && \
-    chown nert:nert /home/nert/.bashrc
+#RUN echo 'if [ -n "$GITHUB_TOKEN_AGENT" ]; then export GH_TOKEN="$GITHUB_TOKEN_AGENT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/agent/.bashrc && \
+#    echo 'if [ -n "$GITHUB_TOKEN_NERT" ]; then export GH_TOKEN="$GITHUB_TOKEN_NERT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/nert/.bashrc && \
+#    chown agent:agent /home/agent/.bashrc && \
+#    chown nert:nert /home/nert/.bashrc
 
 RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     cp /tmp/authorizedkeys /home/agent/.ssh/authorized_keys && \
