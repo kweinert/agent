@@ -84,11 +84,6 @@ COPY authorizedkeys /tmp/authorizedkeys
 RUN echo 'GITHUB_TOKEN_AGENT' >> /etc/environment && \
     echo 'GITHUB_TOKEN_NERT'   >> /etc/environment
 
-RUN echo 'if [ -n "$GITHUB_TOKEN_AGENT" ]; then export GH_TOKEN="$GITHUB_TOKEN_AGENT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/agent/.bashrc && \
-    echo 'if [ -n "$GITHUB_TOKEN_NERT" ]; then export GH_TOKEN="$GITHUB_TOKEN_NERT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/nert/.bashrc && \
-    chown agent:agent /home/agent/.bashrc && \
-    chown nert:nert /home/nert/.bashrc
-
 RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     cp /tmp/authorizedkeys /home/agent/.ssh/authorized_keys && \
     cp /tmp/authorizedkeys /home/nert/.ssh/authorized_keys && \
@@ -105,7 +100,9 @@ RUN echo "set -g mouse on" > /etc/tmux.conf && \
     echo "set -sg escape-time 10" >> /etc/tmux.conf && \
     echo "setw -g mode-keys vi" >> /etc/tmux.conf && \
     echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/agent/.bashrc && \
-    echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/nert/.bashrc 
+    echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/nert/.bashrc && \
+	chown -R agent:agent /home/agent/.bashrc && \
+    chown -R nert:nert /home/nert/.bashrc
 
 ## R Configuration (Using PPM Binaries)
 RUN R_VERSION=$(R --version | head -n 1 | sed -E 's/.*version ([0-9]+\.[0-9]+).*/\1/') && \
