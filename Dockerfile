@@ -44,6 +44,9 @@ RUN mkdir -p /var/run/sshd && \
     echo "KbdInteractiveAuthentication no" >> /etc/ssh/sshd_config && \
     echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \
     echo "AllowUsers agent nert" >> /etc/ssh/sshd_config && \
+	echo "" >> /etc/ssh/sshd_config && \
+	echo "# Custom Github Tokens" >> /etc/ssh/sshd_config && \
+	echo "PermitUserEnvironment yes" >> /etc/ssh/sshd_config && \
     sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
 
 ## DuckDB 
@@ -80,22 +83,16 @@ USER root
 COPY authorizedkeys /tmp/authorizedkeys
 
 ## Per-user GitHub tokens for SSH login shells
-RUN echo 'GH_TOKEN' >> /etc/environment && \
-    # For agent user
-    echo 'if [ "$USER" = "agent" ] && [ -n "$GITHUB_TOKEN_AGENT" ]; then' >> /home/agent/.bashrc && \
-    echo '  export GH_TOKEN="$GITHUB_TOKEN_AGENT"' >> /home/agent/.bashrc && \
-    echo 'fi' >> /home/agent/.bashrc && \
-    # For nert user
-    echo 'if [ "$USER" = "nert" ] && [ -n "$GITHUB_TOKEN_NERT" ]; then' >> /home/nert/.bashrc && \
-    echo '  export GH_TOKEN="$GITHUB_TOKEN_NERT"' >> /home/nert/.bashrc && \
-    echo 'fi' >> /home/nert/.bashrc && \
-    # Make sure both users own their .bashrc
+RUN echo 'if [ -n "$GITHUB_TOKEN_AGENT" ]; then export GH_TOKEN="$GITHUB_TOKEN_AGENT"; unset GITHUB_TOKEN_AGENT GITHUB_TOKEN_NERT; fi' >> /home/agent/.bashrc && \
+    echo 'if [ -n "$GITHUB_TOKEN_NERT" ]; then export GH_TOKEN="$GITHUB_TOKEN_NERT"; unset GITHUB_TOKEN_NERT GITHUB_TOKEN_AGENT; fi' >> /home/nert/.bashrc && \
     chown agent:agent /home/agent/.bashrc && \
     chown nert:nert /home/nert/.bashrc
 
 RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     cp /tmp/authorizedkeys /home/agent/.ssh/authorized_keys && \
     cp /tmp/authorizedkeys /home/nert/.ssh/authorized_keys && \
+	echo 'GITHUB_TOKEN_AGENT=${GITHUB_TOKEN_AGENT}' > /home/agent/.ssh/environment && \
+	echo 'GITHUB_TOKEN_NERT=${GITHUB_TOKEN_NERT}' > /home/nert/.ssh/environment && \
     chown -R agent:agent /home/agent/.ssh && \
     chown -R nert:nert /home/nert/.ssh && \
     chmod 700 /home/agent/.ssh /home/nert/.ssh && \
