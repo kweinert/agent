@@ -44,6 +44,7 @@ RUN mkdir -p /var/run/sshd && \
     echo "KbdInteractiveAuthentication no" >> /etc/ssh/sshd_config && \
     echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \
     echo "AllowUsers agent nert" >> /etc/ssh/sshd_config && \
+	echo "PermitUserEnvironment yes" >> /etc/ssh/sshd_config && \
     sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
 
 ## DuckDB 
@@ -91,8 +92,6 @@ RUN echo 'if [ -n "$GITHUB_TOKEN_AGENT" ]; then export GH_TOKEN="$GITHUB_TOKEN_A
 RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     cp /tmp/authorizedkeys /home/agent/.ssh/authorized_keys && \
     cp /tmp/authorizedkeys /home/nert/.ssh/authorized_keys && \
-	echo 'GITHUB_TOKEN_AGENT=${GITHUB_TOKEN_AGENT}' > /home/agent/.ssh/environment && \
-	echo 'GITHUB_TOKEN_NERT=${GITHUB_TOKEN_NERT}' > /home/nert/.ssh/environment && \
     chown -R agent:agent /home/agent/.ssh && \
     chown -R nert:nert /home/nert/.ssh && \
     chmod 700 /home/agent/.ssh /home/nert/.ssh && \
@@ -144,6 +143,17 @@ USER root
 HEALTHCHECK --interval=60s --timeout=20s --start-period=120s --retries=3 \
     CMD bash -c 'echo -n > /dev/tcp/127.0.0.1/22' || exit 1
 EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
+
+## Entrypoint 
+RUN echo '#!/bin/bash' > /usr/local/bin/entrypoint.sh && \
+	echo 'echo "GH_TOKEN=${GITHUB_TOKEN_AGENT}" > /home/agent/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
+	echo 'echo "GH_TOKEN=${GITHUB_TOKEN_NERT}" > /home/nert/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
+	echo 'chown agent:agent /home/agent/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
+	echo 'chown nert:nert /home/nert/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
+	echo 'chmod 600 /home/agent/.ssh/environment /home/nert/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
+	echo 'exec /usr/sbin/sshd -D' >> /usr/local/bin/entrypoint.sh && \
+	chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 
