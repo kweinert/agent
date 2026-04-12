@@ -93,13 +93,9 @@ RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     chmod 600 /home/agent/.ssh/authorized_keys /home/nert/.ssh/authorized_keys && \
     rm /tmp/authorizedkeys
 	
-## Shell UX (Tmux & Bashrc) + GITHUB_TOKEN placeholder for both users
-RUN echo "set -g mouse on" > /etc/tmux.conf && \
-    echo "set -g history-limit 50000" >> /etc/tmux.conf && \
-    echo "set -g default-terminal \"screen-256color\"" >> /etc/tmux.conf && \
-    echo "set -sg escape-time 10" >> /etc/tmux.conf && \
-    echo "setw -g mode-keys vi" >> /etc/tmux.conf && \
-    echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/agent/.bashrc && \
+## tmux
+COPY tmux.conf /etc/tmux.conf
+RUN echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/agent/.bashrc && \
     echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s main; fi' >> /home/nert/.bashrc && \
 	chown -R agent:agent /home/agent/.bashrc && \
     chown -R nert:nert /home/nert/.bashrc
