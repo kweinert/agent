@@ -1,0 +1,12 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "lsp": {
+      "air": {
+        "command": ["air", "language-server"],
+        "extensions": [".r", ".R"]
+      }
+    },
+    "tui": {
+      "sidebar": "hide"
+    }
+}
