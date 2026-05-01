@@ -106,6 +106,10 @@ RUN echo 'if [ -z "$TMUX" ] && [[ $- == *i* ]]; then exec tmux new-session -A -s
 	chown -R agent:agent /home/agent/.bashrc && \
     chown -R nert:nert /home/nert/.bashrc
 
+# opencode
+RUN mkdir -p /home/agent/.config && chown agent:agent /home/agent/.config
+COPY --chown=agent:agent opencode/ /home/agent/.config/opencode/
+
 ## R Configuration (Using PPM Binaries)
 RUN R_VERSION=$(R --version | head -n 1 | sed -E 's/.*version ([0-9]+\.[0-9]+).*/\1/') && \
     echo "Detected R version: $R_VERSION" && \
