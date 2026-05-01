@@ -26,6 +26,12 @@ RUN curl -LsSf https://github.com/posit-dev/air/releases/latest/download/air-ins
     && rm -rf /root/.local \
     && air --version
 
+# Tokei (count code)
+RUN wget https://github.com/XAMPPRocky/tokei/releases/latest/download/tokei-x86_64-unknown-linux-musl.tar.gz \
+    && tar -xvzf tokei-x86_64-unknown-linux-musl.tar.gz \
+    && mv tokei /usr/local/bin/ \
+    && rm tokei-x86_64-unknown-linux-musl.tar.gz
+
 ## Create users: agent and nert (with passwordless sudo)
 RUN useradd -m -s /bin/bash agent && \
     useradd -m -s /bin/bash nert && \
