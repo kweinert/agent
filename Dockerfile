@@ -33,8 +33,12 @@ RUN curl -LsSf https://github.com/posit-dev/air/releases/latest/download/air-ins
     && air --version
 
 # Tokei (count code)
-RUN cargo install tokei --root /usr/local && \
-	rm -rf /root/.cargo
+# apt-get cargo does not work
+ENV RUSTUP_HOME=/opt/rust
+ENV CARGO_HOME=/opt/rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path && \
+	/opt/rust/bin/cargo install tokei --root /usr/local && \
+	rm -rf /opt/rust
 
 ## Create users: agent and nert (with passwordless sudo)
 RUN useradd -m -s /bin/bash agent && \
