@@ -10,7 +10,7 @@ RUN apt-get update && \
         libcurl4 libxml2-dev libssl-dev build-essential xclip ripgrep fd-find fzf \
 		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
 		libopenblas0 libopenblas-dev \
-        sudo gh tzdata cargo \
+        sudo gh tzdata \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
 
