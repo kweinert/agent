@@ -10,9 +10,15 @@ RUN apt-get update && \
         libcurl4 libxml2-dev libssl-dev build-essential xclip ripgrep fd-find fzf \
 		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
 		libopenblas0 libopenblas-dev \
-        sudo gh \
+        sudo gh tzdata \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
+
+# time zone
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    dpkg-reconfigure --frontend noninteractive tzdata
 
 ## Neovim 
 RUN curl -LO https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz && \
@@ -77,6 +83,14 @@ RUN mkdir -p /home/agent/.local/share /home/agent/.config && \
     chown -R nert:nert /home/nert
 
 USER agent
+WORKDIR /home/agent
+
+# Configure Git 
+RUN git config --global credential.helper "!gh auth git-credential" && \
+    git config --global user.name "OpenCode Agent" && \
+    git config --global user.email "agent@opencode.local"
+
+# opencode
 RUN curl -fsSL https://opencode.ai/install | bash
 
 USER root
