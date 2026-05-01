@@ -10,7 +10,7 @@ RUN apt-get update && \
         libcurl4 libxml2-dev libssl-dev build-essential xclip ripgrep fd-find fzf \
 		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
 		libopenblas0 libopenblas-dev \
-        sudo gh tzdata \
+        sudo gh tzdata cargo \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
 
@@ -33,10 +33,8 @@ RUN curl -LsSf https://github.com/posit-dev/air/releases/latest/download/air-ins
     && air --version
 
 # Tokei (count code)
-RUN wget https://github.com/XAMPPRocky/tokei/releases/latest/download/tokei-x86_64-unknown-linux-musl.tar.gz \
-    && tar -xvzf tokei-x86_64-unknown-linux-musl.tar.gz \
-    && mv tokei /usr/local/bin/ \
-    && rm tokei-x86_64-unknown-linux-musl.tar.gz
+RUN cargo install tokei --root /usr/local && \
+	rm -rf /root/.cargo
 
 ## Create users: agent and nert (with passwordless sudo)
 RUN useradd -m -s /bin/bash agent && \
