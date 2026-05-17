@@ -11,6 +11,8 @@ RUN apt-get update && \
 		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
 		libopenblas0 libopenblas-dev \
         sudo gh tzdata \
+		libfontconfig1-dev libfreetype6-dev libfribidi-dev libgit2-dev \
+		libharfbuzz-dev libtiff-dev libwebp-dev libx11-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
 
