@@ -143,7 +143,7 @@ RUN R_VERSION=$(R --version | head -n 1 | sed -E 's/.*version ([0-9]+\.[0-9]+).*
     echo ")" >> /usr/lib/R/etc/Rprofile.site && \
     R -q -e 'install.packages("pak", repos = "https://r-lib.github.io/p/pak/stable")' && \
     R -q -e 'pak::pkg_install(c("remotes", "data.table", "duckdb", "shiny", "bslib", "reactable", "plotly", "pdftools", \
-		"RhpcBLASctl", "nanoparquet", "httr", "jsonlite", "R.utils", "roxygen2", "devtools"))'
+		"RhpcBLASctl", "nanoparquet", "httr", "jsonlite", "R.utils", "roxygen2", "devtools", "tinytest"))'
 
 ##  Neovim Setup (copy config + sync plugins for both users)
 COPY kickstart.nvim /tmp/kickstart.nvim
