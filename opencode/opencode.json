@@ -6,7 +6,7 @@
         "extensions": [".r", ".R"]
       }
     },
-    "tui": {
-      "sidebar": "hide"
+    "skills": {
+      "paths": ["~/.config/opencode/skills"]                                                                                                             
     }
 }

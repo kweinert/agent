@@ -1,3 +1,4 @@
 {
-    "theme": "cobalt2"
+    "theme": "cobalt2",
+    "sidebar": "hide"
 }

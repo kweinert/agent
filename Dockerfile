@@ -50,13 +50,6 @@ RUN curl -sL "https://codeberg.org/forgejo-contrib/forgejo-cli/releases/download
     chmod +x /usr/local/bin/fj && \
     fj version
 
-## forgejo-cli-ex (fj-ex) - Forgejo CLI extension (Actions logs/runs/artifacts)                                                                                 
-RUN FJ_EX_VERSION=$(curl -s "https://api.github.com/repos/JKamsker/forgejo-cli-ex/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \   
-    curl -Lo /tmp/fj-ex.tar.gz "https://github.com/JKamsker/forgejo-cli-ex/releases/download/v${FJ_EX_VERSION}/fj-ex-linux-x86_64.tar.gz" && \                  
-    tar xzf /tmp/fj-ex.tar.gz -C /usr/local/bin/ fj-ex && \                                                                                                     
-    rm /tmp/fj-ex.tar.gz && \                                                                                                                                   
-    fj-ex --version
-
 ## Create users: agent and nert (with passwordless sudo)
 RUN useradd -m -s /bin/bash agent && \
     useradd -m -s /bin/bash nert && \
