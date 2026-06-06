@@ -12,6 +12,7 @@ SCRIPT_DIR="$( cd -P "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd 
 
 IMAGE_NAME="opencode-image"
 CONTAINER_NAME="opencode-container"
+NETWORK_NAME="dev-network"
 
 # Default values — feel free to override via environment variables
 PORT_MAPPING="2222:22"
@@ -46,8 +47,16 @@ build() {
 }
 
 run() {
-  echo "→ Starting container '$CONTAINER_NAME' ..."
+  # Testen, ob das Netzwerk existiert, andernfalls erstellen
+  if ! docker network inspect "$NETWORK_NAME" &>/dev/null; then
+    echo "Netzwerk '$NETWORK_NAME' existiert nicht. Erstelle Netzwerk..."
+    docker network create "$NETWORK_NAME"
+  else
+    echo "Netzwerk '$NETWORK_NAME' ist bereits vorhanden."
+  fi
 
+  echo "→ Starting container '$CONTAINER_NAME' im Netzwerk $NETWORK_NAME..."
+  echo "FT: $FORGEJO_TOKEN"
   # Stop and remove if already running
   docker stop "$CONTAINER_NAME" >/dev/null 2>&1 || true
   docker rm "$CONTAINER_NAME" >/dev/null 2>&1 || true
@@ -55,10 +64,12 @@ run() {
   # Try to start it
   if ! docker run -d \
     --name "$CONTAINER_NAME" \
+    --network "$NETWORK_NAME" \
     -p "$PORT_MAPPING" \
     --restart unless-stopped \
     -e GITHUB_TOKEN_NERT \
     -e GITHUB_TOKEN_AGENT \
+    -e FORGEJO_TOKEN \
     "$IMAGE_NAME"; then
     echo "❌ Failed to create container" >&2
     exit 1

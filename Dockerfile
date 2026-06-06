@@ -5,14 +5,17 @@ USER root
 ## System basics 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        openssh-server python3 python3-pip git wget unzip curl tmux less htop \
+        openssh-server git wget unzip curl tmux less htop \
         r-base r-base-dev libcurl4-openssl-dev \
         libcurl4 libxml2-dev libssl-dev build-essential xclip ripgrep fd-find fzf \
-		cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
-		libopenblas0 libopenblas-dev \
+	cmake libuv1-dev pandoc poppler-data libpoppler-cpp-dev \
+	libopenblas0 libopenblas-dev \
         sudo gh tzdata \
-		libfontconfig1-dev libfreetype6-dev libfribidi-dev libgit2-dev \
-		libharfbuzz-dev libtiff-dev libwebp-dev libx11-dev \
+	libfontconfig1-dev libfreetype6-dev libfribidi-dev libgit2-dev \
+	libharfbuzz-dev libtiff-dev libwebp-dev libx11-dev \
+	software-properties-common python3-pip \ 
+    && add-apt-repository -y ppa:deadsnakes/ppa  \
+    && apt-get update && apt-get install -y python3.14 python3.14-venv \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which fdfind) /usr/local/bin/fd
 
@@ -34,13 +37,18 @@ RUN curl -LsSf https://github.com/posit-dev/air/releases/latest/download/air-ins
     && rm -rf /root/.local \
     && air --version
 
-# Tokei (count code)
-# apt-get cargo does not work
+## Tokei (Code zählen)
 ENV RUSTUP_HOME=/opt/rust
 ENV CARGO_HOME=/opt/rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path && \
-	/opt/rust/bin/cargo install tokei --root /usr/local && \
-	rm -rf /opt/rust
+    /opt/rust/bin/cargo install tokei --root /usr/local && \
+    rm -rf /opt/rust
+
+## Forgejo-CLI v0.5.0 
+RUN curl -sL "https://codeberg.org/forgejo-contrib/forgejo-cli/releases/download/v0.5.0/forgejo-cli-x86_64-linux.tar.gz" \
+    | tar -xzf - -C /usr/local/bin && \
+    chmod +x /usr/local/bin/fj
+RUN fj version
 
 ## Create users: agent and nert (with passwordless sudo)
 RUN useradd -m -s /bin/bash agent && \
@@ -71,7 +79,11 @@ RUN DUCKDB_VERSION=$(curl -s https://api.github.com/repos/duckdb/duckdb/releases
     chmod +x /usr/local/bin/duckdb
 
 ## Lea
-RUN pip3 install --no-cache-dir --break-system-packages lea-cli duckdb
+RUN python3.14 -c "import sys; v = sys.version_info; assert (v.major, v.minor) >= (3, 14), f'Python {v.major}.{v.minor} < 3.14'"
+RUN python3.14 -m venv /opt/lea-venv
+RUN /opt/lea-venv/bin/pip install --upgrade pip
+RUN /opt/lea-venv/bin/pip install lea-cli duckdb
+ENV PATH="/opt/lea-venv/bin:${PATH}"
 
 ## lazygit 
 RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
@@ -106,7 +118,8 @@ COPY authorizedkeys /tmp/authorizedkeys
 
 ## Per-user GitHub tokens for SSH login shells
 RUN echo 'GITHUB_TOKEN_AGENT' >> /etc/environment && \
-    echo 'GITHUB_TOKEN_NERT'   >> /etc/environment
+    echo 'GITHUB_TOKEN_NERT'   >> /etc/environment && \
+    echo 'FORGEJO_TOKEN' >> /etc/environment
 
 RUN mkdir -p /home/agent/.ssh /home/nert/.ssh && \
     cp /tmp/authorizedkeys /home/agent/.ssh/authorized_keys && \
@@ -170,6 +183,8 @@ EXPOSE 22
 RUN echo '#!/bin/bash' > /usr/local/bin/entrypoint.sh && \
 	echo 'echo "GH_TOKEN=${GITHUB_TOKEN_AGENT}" > /home/agent/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
 	echo 'echo "GH_TOKEN=${GITHUB_TOKEN_NERT}" > /home/nert/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
+	echo 'echo "FORGEJO_TOKEN=${FORGEJO_TOKEN}" > /home/agent/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
+	echo 'echo "FORGEJO_TOKEN=${FORGEJO_TOKEN}" > /home/nert/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
 	echo 'chown agent:agent /home/agent/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
 	echo 'chown nert:nert /home/nert/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
 	echo 'chmod 600 /home/agent/.ssh/environment /home/nert/.ssh/environment' >> /usr/local/bin/entrypoint.sh && \
