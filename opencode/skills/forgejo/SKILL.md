@@ -1,6 +1,6 @@
 ---
 name: forgejo
-description: Use when working with the local forgejo instance (http://forgejo:3000), using fj CLI, cloning from forgejo, or managing Forgejo Actions/CI on this environment.
+description: Use when working with the local forgejo instance (http://forgejo:3000), using fj or fj-ex CLI, cloning from forgejo, or managing Forgejo Actions/CI on   this environment.
 ---
 
 # Local Forgejo Environment
@@ -82,7 +82,37 @@ The bfett project uses a multi-job pipeline (`.forgejo/workflows/pipeline.yml`):
 | **test-bfett** | `test_package("bfett")` via tinytest | needs build |
 | **test-bfett-app** | `test_package("bfett.app")` via tinytest | needs build |
 | **push** | `docker push forgejo:3000/kgw-agent/bfett:<branch>` | needs test jobs + branch is `dev` or `main` |
-| **deploy** | `curl $DEPLOY_WEBHOOK_URL` | needs push + branch is `main` |
+| **deploy** | `docker run` with volume/port mounts + health checks | needs push + branch `dev` or `main` |
+
+### Health Checks & Network Isolation
+
+The CI runner container runs on `dev-network` (custom Docker bridge), not `--network host`.
+Containers started by deploy steps without `--network dev-network` land on the default bridge
+and are unreachable from the runner via `localhost:hostPort`. Always use `docker exec` to probe
+the app from inside its own container:
+
+```yaml
+# ✅ Works — reaches the app via container-internal localhost
+docker exec bfett-${{ ref }} curl -s -o /dev/null -w "%{http_code}" "http://localhost:3838"
+
+# ❌ Fails — runner's localhost != host's localhost
+curl -s -o /dev/null -w "%{http_code}" "http://localhost:$HOST_PORT"
+```
+
+For `docker exec` to work, the target container must have `curl` (or whatever tool) installed.
+
+### Stale Image Cache
+
+`docker pull <tag>` may print `Status: Image is up to date` even when the registry tag points
+to a newer digest, if the runner's Docker daemon has an older copy cached. Mitigate by removing
+the local tag first:
+
+```yaml
+docker rmi -f <image>:<tag> 2>/dev/null || true
+docker pull <image>:<tag>
+```
+
+This forces fresh layer downloads.
 
 - Tests are run inside the built image with:
   ```r
