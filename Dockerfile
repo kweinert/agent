@@ -57,6 +57,13 @@ RUN useradd -m -s /bin/bash agent && \
     echo "nert ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/nert && \
     chmod 0440 /etc/sudoers.d/nert
 
+## Helix Editor
+RUN HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/releases/latest" | grep -Po '"tag_name": "\K[^"]+') && \
+    curl -L "https://github.com/helix-editor/helix/releases/download/${HELIX_VERSION}/helix-${HELIX_VERSION}-x86_64-linux.tar.xz" -o /tmp/helix-${HELIX_VERSION}-x86_64-linux.tar.xz && \
+    tar -C /opt -xf /tmp/helix-${HELIX_VERSION}-x86_64-linux.tar.xz && \
+    ln -sf /opt/helix-${HELIX_VERSION}-x86_64-linux/hx /usr/local/bin/hx && \
+    rm /tmp/helix-${HELIX_VERSION}-x86_64-linux.tar.xz
+
 ## SSH Setup - ONLY agent and nert allowed, key-only authentication
 RUN mkdir -p /var/run/sshd && \
 	ssh-keygen -A && \
