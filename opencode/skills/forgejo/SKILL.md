@@ -1,6 +1,6 @@
 ---
 name: forgejo
-description: Use when working with the local forgejo instance (http://forgejo:3000), using fj or fj-ex CLI, cloning from forgejo, or managing Forgejo Actions/CI on   this environment.
+description: Use when working with the local forgejo instance (http://forgejo:3000), using fj CLI, cloning from forgejo, or managing Forgejo Actions/CI on this environment.
 ---
 
 # Local Forgejo Environment
@@ -10,9 +10,17 @@ description: Use when working with the local forgejo instance (http://forgejo:30
 - **Host:** `http://forgejo:3000` (resolves to `172.24.0.3` on the Docker network)
 - **Token:** `FORGEJO_TOKEN` env var (HTTP Basic Auth for git operations)
 - **Git clone pattern:**
-```bash
-git clone http://forgejo:${FORGEJO_TOKEN}@forgejo:3000/{owner}/{repo}
-```
+  ```bash
+  git clone http://forgejo:${FORGEJO_TOKEN}@forgejo:3000/{owner}/{repo}
+  ```
+- **In CI workflow steps** (must specify branch explicitly):
+  ```yaml
+  - name: Checkout
+    run: |
+      git clone --depth 1 \
+        "http://forgejo:${FORGEJO_TOKEN}@forgejo:3000/${FORGEJO_REPOSITORY}.git" \
+        --branch "${{ forgejo.ref_name }}" .
+  ```
 
 ## `fj` CLI (Forgejo CLI v0.5.0)
 
@@ -66,20 +74,24 @@ For multi-job workflows, iterate `job_id` (0, 1, 2...) until 404.
 
 ## CI Pipeline (Forgejo Actions)
 
-The bfett project CI:
-- **Trigger:** Push to `dev` branch
-- **Steps:**
-1. Checkout
-2. Docker login (to `ghcr.io`)
-3. Docker build with metadata tags (branch name + sha)
-4. Run R tests via `tinytest` (packages: `bfett`, `bfett.app`)
-5. Push image to `ghcr.io`
-- Tests are run inside the built container with:
-```r
-library(tinytest)
-r <- test_package("bfett")
-```
-Exits with status 1 on any failure.
+The bfett project uses a multi-job pipeline (`.forgejo/workflows/pipeline.yml`):
+
+| Stage | Job | Runs condition |
+|-------|-----|----------------|
+| **build** | `docker build -t bfett:ci-test .` | always |
+| **test-bfett** | `test_package("bfett")` via tinytest | needs build |
+| **test-bfett-app** | `test_package("bfett.app")` via tinytest | needs build |
+| **push** | `docker push forgejo:3000/kgw-agent/bfett:<branch>` | needs test jobs + branch is `dev` or `main` |
+| **deploy** | `curl $DEPLOY_WEBHOOK_URL` | needs push + branch is `main` |
+
+- Tests are run inside the built image with:
+  ```r
+  library(tinytest)
+  r <- test_package("bfett")
+  ```
+  Exits with status 1 on any failure.
+
+- Registry push is **branch-guarded** — only `dev` and `main` get pushed. `main` also receives `:latest`.
 
 ## Git Workflow
 
@@ -111,11 +123,21 @@ Forgejo Actions provides both `FORGEJO_*` / `forgejo.*` (native) and `GITHUB_*` 
 | `${{ forgejo.workspace }}` | `$FORGEJO_WORKSPACE` | Default working directory on the runner |
 | `${{ secrets.GITHUB_TOKEN }}` | `$FORGEJO_TOKEN` | Auto-generated auth token (masked in logs) |
 
-Note: `$FORGEJO_TOKEN` is automatically masked in log output by the runner, so embedding it in URLs (e.g. `http://forgejo:${FORGEJO_TOKEN}@forgejo:3000/...`) is sa  fe.
+Note: `$FORGEJO_TOKEN` is automatically masked in log output by the runner, so embedding it in URLs (e.g. `http://forgejo:${FORGEJO_TOKEN}@forgejo:3000/...`) is safe.
+
+> **Scope limitation:** The auto-generated `$FORGEJO_TOKEN` has write permission to the **repository** (push commits, create labels, merge PRs) but **not** `write:package` scope. Container registry push requires a separate token. See [Container Registry](#container-registry) section.
 
 ## Container Registry
 
 Forgejo has an OCI-compatible container registry at `forgejo:3000`.
+
+> **Warning:** The auto-generated `$FORGEJO_TOKEN` has repository-level write access but **lacks `write:package` scope** (packages are owner-scoped, not repo-scoped). Using it with `docker login` will fail on push with `unauthorized: reqPackageAccess`.
+> **Workaround:** Use a token with `write:package` scope stored as a secret (e.g. `REGISTRY_TOKEN`):
+> ```yaml
+> - name: Login to container registry
+>   run: echo "${{ secrets.REGISTRY_TOKEN }}" | docker login forgejo:3000 -u <user> --password-stdin
+> ```
+> This applies whether you use Docker login or registry API auth.
 
 ```bash
 # Get a short-lived token
