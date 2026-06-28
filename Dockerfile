@@ -65,8 +65,8 @@ RUN HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/rel
     rm /tmp/helix-${HELIX_VERSION}-x86_64-linux.tar.xz && \
 	echo "export COLORTERM=truecolor" >> /home/nert/.bashrc && \
 	echo "export COLORTERM=truecolor" >> /home/agent/.bashrc
-COPY config.toml /home/nert/.config/helix/config.toml
-COPY config.toml /home/agent/.config/helix/config.toml
+COPY hx_config.toml /home/nert/.config/helix/config.toml
+COPY hx_config.toml /home/agent/.config/helix/config.toml
 
 ## SSH Setup - ONLY agent and nert allowed, key-only authentication
 RUN mkdir -p /var/run/sshd && \
