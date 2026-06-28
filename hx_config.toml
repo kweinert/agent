@@ -5,6 +5,8 @@ line-number = "relative"
 tab-width = 4
 insert-spaces = true
 
+lsp.display-messages = "warning"
+
 # Sichtbare Hilfslinien für Einrückungen (Indentation Guides)
 indent-guides.render = true
 indent-guides.character = "╎" # Ein dünner Strich statt der Standard-Punkte
