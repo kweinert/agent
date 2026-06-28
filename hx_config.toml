@@ -3,9 +3,9 @@ theme = "fleet_dark"
 [editor]
 line-number = "relative"
 tab-width = 4
-insert-spaces = true
+smart-tab = { enable = true, supersede-menu = false } 
 
-lsp.display-messages = "warning"
+lsp.display-messages = false
 
 # Sichtbare Hilfslinien für Einrückungen (Indentation Guides)
 indent-guides.render = true
