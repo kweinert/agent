@@ -2,16 +2,19 @@ theme = "fleet_dark"
 
 [editor]
 line-number = "relative"
-tab-width = 4
-smart-tab = { enable = true, supersede-menu = false } 
-
-lsp.display-messages = false
+smart-tab = { enable = true, supersede-menu = false }
 
 # Sichtbare Hilfslinien für Einrückungen (Indentation Guides)
-indent-guides.render = true
-indent-guides.character = "╎" # Ein dünner Strich statt der Standard-Punkte
+[editor.indent-guides]
+render = true
+character = "╎" 
 
-# Cursor-Formen je nach Modus anpassen (Block im Normal-Modus, Strich im Insert-Modus)
+# LSP-Einstellungen (Ruhe vor den Inline-Tips)
+[editor.lsp]
+display-messages = false
+display-inlay-hints = false
+
+# Cursor-Formen je nach Modus anpassen
 [editor.cursor-shape]
 normal = "block"
 insert = "bar"
