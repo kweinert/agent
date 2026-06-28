@@ -1,0 +1,16 @@
+theme = "fleet_dark"
+
+[editor]
+line-number = "relative"
+tab-width = 4
+insert-spaces = true
+
+# Sichtbare Hilfslinien für Einrückungen (Indentation Guides)
+indent-guides.render = true
+indent-guides.character = "╎" # Ein dünner Strich statt der Standard-Punkte
+
+# Cursor-Formen je nach Modus anpassen (Block im Normal-Modus, Strich im Insert-Modus)
+[editor.cursor-shape]
+normal = "block"
+insert = "bar"
+select = "underline"
