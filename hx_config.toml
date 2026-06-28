@@ -4,11 +4,6 @@ theme = "fleet_dark"
 line-number = "relative"
 smart-tab = { enable = true, supersede-menu = false }
 
-# Sichtbare Hilfslinien für Einrückungen (Indentation Guides)
-[editor.indent-guides]
-render = true
-character = "╎" 
-
 # LSP-Einstellungen (Ruhe vor den Inline-Tips)
 [editor.lsp]
 display-messages = false
